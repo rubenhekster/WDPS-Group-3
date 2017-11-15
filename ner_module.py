@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyspark.context import SparkContext
 import zipimport
-import os
+from pyspark import SparkFiles
 
 importer = zipimport.zipimporter('nltk.zip')
 nltk = importer.load_module('nltk')
@@ -34,7 +34,7 @@ sentences = ["Donald John Trump (born June 14, 1946) is the 45th and current Pre
 
 sc = SparkContext.getOrCreate()
 sc.addPyFile("six.py")
-print os.getenv("SPARK_YARN_CACHE_FILES")
+print SparkFiles.getDirectory()
 
 sentences_rdd = sc.parallelize(sentences)
 chunked_rdd = sentences_rdd.map(lambda x: nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(x))))

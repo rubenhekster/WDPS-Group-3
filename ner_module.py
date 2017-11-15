@@ -32,6 +32,7 @@ sentences = ["Donald John Trump (born June 14, 1946) is the 45th and current Pre
 
 
 sc = SparkContext.getOrCreate()
+sc.addPyFile("six.py")
 sentences_rdd = sc.parallelize(sentences)
 chunked_rdd = sentences_rdd.map(lambda x: nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(x))))
 named_entity_rdd = chunked_rdd.map(lambda x: traverseTree(x))

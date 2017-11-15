@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from pyspark.context import SparkContext
-import zipimport
+#import zipimport
 from pyspark import SparkFiles
 
-importer = zipimport.zipimporter('nltk.zip')
-nltk = importer.load_module('nltk')
+#importer = zipimport.zipimporter('nltk.zip')
+#nltk = importer.load_module('nltk')
 
 
 def traverseTree(tree):
@@ -14,6 +14,9 @@ def traverseTree(tree):
             outList[' '.join(c[0] for c in chunk)] = chunk.label()
     return outList
 
+def ner(x):
+    import nltk
+    return nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(x)))
 
 sentences = ["Donald John Trump (born June 14, 1946) is the 45th and current President of the United States, "
              "in office since January 20, 2017. Before entering politics, he was a businessman and television "
@@ -37,7 +40,7 @@ sc.addPyFile("six.py")
 print SparkFiles.getDirectory()
 
 sentences_rdd = sc.parallelize(sentences)
-chunked_rdd = sentences_rdd.map(lambda x: nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(x))))
+chunked_rdd = sentences_rdd.map(lambda x: ner(x))
 named_entity_rdd = chunked_rdd.map(lambda x: traverseTree(x))
 
 print(named_entity_rdd.collect())

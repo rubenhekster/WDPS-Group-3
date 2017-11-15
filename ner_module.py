@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyspark.context import SparkContext
 from nltk import word_tokenize, pos_tag, ne_chunk
 

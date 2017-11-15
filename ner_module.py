@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from pyspark.context import SparkContext
-#import zipimport
-from pyspark import SparkFiles
 
-#importer = zipimport.zipimporter('nltk.zip')
-#nltk = importer.load_module('nltk')
+
+
 
 
 def traverseTree(tree):
@@ -36,9 +34,6 @@ sentences = ["Donald John Trump (born June 14, 1946) is the 45th and current Pre
 
 
 sc = SparkContext.getOrCreate()
-sc.addPyFile("six.py")
-print SparkFiles.getDirectory()
-
 sentences_rdd = sc.parallelize(sentences)
 chunked_rdd = sentences_rdd.map(lambda x: ner(x))
 named_entity_rdd = chunked_rdd.map(lambda x: traverseTree(x))

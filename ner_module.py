@@ -3,7 +3,7 @@ from pyspark.context import SparkContext
 import zipimport
 import os
 
-importer = zipimport.zipimporter('shipData.zip')
+importer = zipimport.zipimporter('nltk.zip')
 nltk = importer.load_module('nltk')
 
 

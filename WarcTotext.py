@@ -9,6 +9,8 @@ def warcToText(url):
 # request the url/warc.gz file
     resp = requests.get(url, stream=True)
     # iterate through the archive
+    fail = 0
+    total  = 0
     for record in ArchiveIterator(resp.raw, arc2warc=True):
         # if the record type is a response (which is the case for html page)
         if record.rec_type == 'response':
@@ -19,12 +21,20 @@ def warcToText(url):
                  | (record.http_headers.get_header('Content-Type') =='text/html; charset=utf-8')| (record.http_headers.get_header('Content-Type') =='text/html; charset=ISO-8859-1')\
                  | (record.http_headers.get_header('Content-Type') =='charset=iso-8859-1')):
                     # return the html page
-                    html = record.content_stream().read()
-                    # from html to plain text
-                    html_parse = html5lib.parseFragment(html)
-                    s = ''.join(html_parse.itertext())
-                    print(s)
-
+                    try:
+                        html = record.content_stream().read()
+                        # from html to plain text
+                        html_parse = html5lib.parseFragment(html)
+                        s = ''.join(html_parse.itertext())
+                        print(s)
+                        total = total +1
+                    except Exception:
+                        fail = fail +1
+                        continue
+    print('fail:')
+    print(fail)
+    print('total:')
+    print(total)
 def main():
     reco = warcToText('https://archive.org/download/ExampleArcAndWarcFiles/IAH-20080430204825-00000-blackbook.warc.gz')
 

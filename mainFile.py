@@ -8,18 +8,23 @@ import re
 
 
 # Function to traverse the chunked tree in NLTK
-def traverseTree((x, tree)):
+def traverseTree((x, fullDoc)):
     outList = {}
-    for chunk in tree:
-        if hasattr(chunk, 'label'):
-            outList[' '.join(c[0] for c in chunk)] = chunk.label()
+    for tree in fullDoc:
+        for chunk in tree:
+            if hasattr(chunk, 'label'):
+                outList[' '.join(c[0] for c in chunk)] = chunk.label()
     return (x, outList)
 
 
 # Function to tokenize a text
 def ner((x, text)):
     import nltk
-    return (x, nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(text))))
+    sentences = nltk.sent_tokenize(text)
+    sentences = [nltk.word_tokenize(sent) for sent in sentences]
+    sentences = [nltk.pos_tag(sent) for sent in sentences]
+    chunks = [nltk.ne_chunk(sent) for sent in sentences]
+    return (x, chunks)
 
 
 # defines which tags are excluded from the HTML file

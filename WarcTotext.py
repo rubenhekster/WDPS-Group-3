@@ -10,7 +10,7 @@ def warcToText(url):
     resp = requests.get(url, stream=True)
     # iterate through the archive
     fail = 0
-    total  = 0
+    succeed  = 0
     for record in ArchiveIterator(resp.raw, arc2warc=True):
         # if the record type is a response (which is the case for html page)
         if record.rec_type == 'response':
@@ -27,14 +27,13 @@ def warcToText(url):
                         html_parse = html5lib.parseFragment(html)
                         s = ''.join(html_parse.itertext())
                         print(s)
-                        total = total +1
+                        succeed = succeed +1
                     except Exception:
                         fail = fail +1
                         continue
-    print('fail:')
-    print(fail)
-    print('total:')
-    print(total)
+    print('fail: %s'%(fail))
+    print('succeed: %s'%(succeed))
+    
 def main():
     reco = warcToText('https://archive.org/download/ExampleArcAndWarcFiles/IAH-20080430204825-00000-blackbook.warc.gz')
 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from pyspark.context import SparkContext
 from html2text import HTML2Text
-import gzip
 from warcio.archiveiterator import ArchiveIterator
 from bs4 import BeautifulSoup
 import re
@@ -37,21 +36,24 @@ def visible(element):
     return True
 
 
-def decode(x):
+
+def decode(x, record_attribute):
     html_pages_array = []
-    x = x[1:]
-    wholeTextFile = ' '.join([c.encode('utf-8') for c in x])
-    print(type(wholeTextFile))
-    print
+    _, payload = x
+    wholeTextFile = ''.join([c.encode('utf-8') for c in payload])
+    wholeTextFile = "WARC/1.0"+wholeTextFile
     from cStringIO import StringIO
     stream = StringIO(wholeTextFile)
     for record in ArchiveIterator(stream):
+
         # if the record type is a response (which is the case for html page)
+
         if record.rec_type == 'response':
             # check if the response is http
             if record.http_headers != None:
                 # Get the WARC-RECORD-ID
                 record_id = record.rec_headers.get_header(record_attribute)
+                print (record_id)
                 # Get the HTML
                 h = HTML2Text()
                 # Clean up the HTML using BeautifulSoup
@@ -66,24 +68,25 @@ def decode(x):
                 # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
                 html_pages_array.append((record_id, result2.encode('utf-8')))
     return html_pages_array
-    
-    
 
 
-record_attribute = sys.argv[1]
-in_file = sys.argv[2]
+record_attribute = sys.argv[1]#"WARC-Record-ID"
+in_file = sys.argv[2]#"/home/kevin/Documents/WDPS/wdps2017/CommonCrawl-sample.warc.gz"
 # We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
 
+# Create Spark Context -- Remove this when running on cluster
+sc = SparkContext.getOrCreate()
 
+rdd_whole_warc_file = rdd = sc.newAPIHadoopFile(in_file,
+    "org.apache.hadoop.mapreduce.lib.input.TextInputFormat",
+    "org.apache.hadoop.io.LongWritable",
+    "org.apache.hadoop.io.Text",
+    conf={"textinputformat.record.delimiter": "WARC/1.0"})
 
-# Create Spark Context -- Remove this when running locally
-sc = SparkContext("yarn", "wdps1703")
+rdd_html_cleaned = rdd_whole_warc_file.flatMap(lambda x: decode(x, record_attribute))
 
-rdd_whole_warc_file = sc.wholeTextFiles(in_file)
-
-rdd_processed = rdd_whole_warc_file.flatMap(lambda x: decode(x))
-
-chunked_rdd = rdd_processed.map(lambda (x, y): ner((x, y)))
+print(rdd_html_cleaned.collect())
+chunked_rdd = rdd_html_cleaned.map(lambda (x, y): ner((x, y)))
 # Extract named entities
 named_entity_rdd = chunked_rdd.map(lambda (x, y): traverseTree((x, y)))
 print(named_entity_rdd.collect())

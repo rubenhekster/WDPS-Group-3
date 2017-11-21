@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 from pyspark.context import SparkContext
-from html2text import HTML2Text
-from warcio.archiveiterator import ArchiveIterator
-from bs4 import BeautifulSoup
-import re
 import sys
 
 
@@ -29,6 +25,7 @@ def ner((x, text)):
 
 # defines which tags are excluded from the HTML file
 def visible(element):
+    import re
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
         return False
     elif re.match('<!--.*-->', str(element.encode('utf-8'))):
@@ -36,19 +33,19 @@ def visible(element):
     return True
 
 
-
 def decode(x, record_attribute):
     html_pages_array = []
     _, payload = x
     wholeTextFile = ''.join([c.encode('utf-8') for c in payload])
-    wholeTextFile = "WARC/1.0\n"+wholeTextFile
+    wholeTextFile = "WARC/1.0" + wholeTextFile
     from cStringIO import StringIO
+    from warcio.archiveiterator import ArchiveIterator
+    from html2text import HTML2Text
+    from bs4 import BeautifulSoup
     stream = StringIO(wholeTextFile)
-    try:
-        for record in ArchiveIterator(stream):
-
-            # if the record type is a response (which is the case for html page)
-
+    for record in ArchiveIterator(stream):
+        # if the record type is a response (which is the case for html page)
+        try:
             if record.rec_type == 'response':
                 # check if the response is http
                 if record.http_headers != None:
@@ -67,27 +64,25 @@ def decode(x, record_attribute):
                     # Build up the resulting list.
                     # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
                     html_pages_array.append((record_id, result2.encode('utf-8')))
-    except Exception:
-        print ("Something is wrong with this entry.")
-
+        except Exception:
+            print ("Something is wrong with this entry.")
     return html_pages_array
 
 
-record_attribute = sys.argv[1]#"WARC-Record-ID"
-in_file = sys.argv[2]#"/home/kevin/Documents/WDPS/wdps2017/CommonCrawl-sample.warc.gz"
+record_attribute = sys.argv[1]  # "WARC-Record-ID"
+in_file = sys.argv[2]  # "/home/kevin/Documents/WDPS/wdps2017/CommonCrawl-sample.warc.gz"
 # We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
 
 # Create Spark Context -- Remove this when running on cluster
 sc = SparkContext.getOrCreate()
 
 rdd_whole_warc_file = rdd = sc.newAPIHadoopFile(in_file,
-    "org.apache.hadoop.mapreduce.lib.input.TextInputFormat",
-    "org.apache.hadoop.io.LongWritable",
-    "org.apache.hadoop.io.Text",
-    conf={"textinputformat.record.delimiter": "WARC/1.0"})
+                                                "org.apache.hadoop.mapreduce.lib.input.TextInputFormat",
+                                                "org.apache.hadoop.io.LongWritable",
+                                                "org.apache.hadoop.io.Text",
+                                                conf={"textinputformat.record.delimiter": "WARC/1.0"})
 
 rdd_html_cleaned = rdd_whole_warc_file.flatMap(lambda x: decode(x, record_attribute))
-
 chunked_rdd = rdd_html_cleaned.map(lambda (x, y): ner((x, y)))
 # Extract named entities
 named_entity_rdd = chunked_rdd.map(lambda (x, y): traverseTree((x, y)))

@@ -40,6 +40,7 @@ def decode(x, record_attribute):
     _, payload = x
     wholeTextFile = ''.join([c.encode('utf-8') for c in payload])
     wholeTextFile = "WARC/1.0" + wholeTextFile
+    wholeTextFile.decode('utf-8')
     from cStringIO import StringIO
     from warcio.archiveiterator import ArchiveIterator
     from html2text import HTML2Text

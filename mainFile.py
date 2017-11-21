@@ -5,6 +5,7 @@ import gzip
 from warcio.archiveiterator import ArchiveIterator
 from bs4 import BeautifulSoup
 import re
+import sys
 
 
 # Function to traverse the chunked tree in NLTK
@@ -36,18 +37,20 @@ def visible(element):
     return True
 
 
+record_attribute = sys.argv[1]
+in_file = sys.argv[2]
 # We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
 html_pages_array = []
 
 # Opens the gzipped warc file.
-with gzip.open('/home/kevin/Documents/WDPS/wdps2017/CommonCrawl-sample.warc.gz', 'rb') as stream:
+with gzip.open(in_file, 'rb') as stream:
     for record in ArchiveIterator(stream):
         # if the record type is a response (which is the case for html page)
         if record.rec_type == 'response':
             # check if the response is http
             if record.http_headers != None:
                 # Get the WARC-RECORD-ID
-                record_id = record.rec_headers.get_header('WARC-Record-ID')
+                record_id = record.rec_headers.get_header(record_attribute)
                 # Get the HTML
                 h = HTML2Text()
                 # Clean up the HTML using BeautifulSoup
@@ -55,12 +58,18 @@ with gzip.open('/home/kevin/Documents/WDPS/wdps2017/CommonCrawl-sample.warc.gz',
                 soup = BeautifulSoup(html, "html5lib")
                 data = soup.findAll(text=True)
                 result = filter(visible, data)
-                result2 = ''.join(result)
+
+                result2 = ';'.encode('utf-8').join(result)
+                result2 = ' '.join(result2.split())
                 # Build up the resulting list.
+                #result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
                 html_pages_array.append((record_id, result2.encode('utf-8')))
 
+
 # Create Spark Context
-sc = SparkContext.getOrCreate()
+sc = SparkContext("yarn", "wdps17XX")
+
+
 # Parallelize the previously created list so it will work in Spark
 documentRDD = sc.parallelize(html_pages_array)
 # Chunk the text

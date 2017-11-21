@@ -17,9 +17,9 @@ def traverseTree((x, fullDoc)):
 def ner((x, text)):
     import nltk
     sentences = nltk.sent_tokenize(text.decode('utf-8'))
-    sentences = [nltk.word_tokenize(sent) for sent in sentences]
-    sentences = [nltk.pos_tag(sent) for sent in sentences]
-    chunks = [nltk.ne_chunk(sent) for sent in sentences]
+    sentences = [nltk.word_tokenize(sent.decode('utf-8')) for sent in sentences]
+    sentences = [nltk.pos_tag(sent.decode('utf-8')) for sent in sentences]
+    chunks = [nltk.ne_chunk(sent.decode('utf-8')) for sent in sentences]
     return (x, chunks)
 
 

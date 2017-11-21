@@ -4,6 +4,7 @@ import sys
 
 
 # Function to traverse the chunked tree in NLTK
+# encoding: utf-8
 def traverseTree((x, fullDoc)):
     outList = {}
     for tree in fullDoc:
@@ -14,6 +15,7 @@ def traverseTree((x, fullDoc)):
 
 
 # Function to tokenize a text
+# encoding: utf-8
 def ner((x, text)):
     import nltk
     sentences = nltk.sent_tokenize(text)

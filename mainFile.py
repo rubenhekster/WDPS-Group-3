@@ -18,6 +18,7 @@ def traverseTree((x, fullDoc)):
 # encoding: utf-8
 def ner((x, text)):
     import nltk
+    text.decode('utf-8')
     sentences = nltk.sent_tokenize(text)
     sentences = [nltk.word_tokenize(sent) for sent in sentences]
     sentences = [nltk.pos_tag(sent) for sent in sentences]

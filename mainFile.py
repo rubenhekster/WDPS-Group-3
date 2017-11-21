@@ -44,29 +44,33 @@ def decode(x, record_attribute):
     wholeTextFile = "WARC/1.0"+wholeTextFile
     from cStringIO import StringIO
     stream = StringIO(wholeTextFile)
-    for record in ArchiveIterator(stream):
+    try:
+        for record in ArchiveIterator(stream):
 
-        # if the record type is a response (which is the case for html page)
+            # if the record type is a response (which is the case for html page)
 
-        if record.rec_type == 'response':
-            # check if the response is http
-            if record.http_headers != None:
-                # Get the WARC-RECORD-ID
-                record_id = record.rec_headers.get_header(record_attribute)
-                print (record_id)
-                # Get the HTML
-                h = HTML2Text()
-                # Clean up the HTML using BeautifulSoup
-                html = record.content_stream().read()
-                soup = BeautifulSoup(html, "html5lib")
-                data = soup.findAll(text=True)
-                result = filter(visible, data)
+            if record.rec_type == 'response':
+                # check if the response is http
+                if record.http_headers != None:
+                    # Get the WARC-RECORD-ID
+                    record_id = record.rec_headers.get_header(record_attribute)
+                    print (record_id)
+                    # Get the HTML
+                    h = HTML2Text()
+                    # Clean up the HTML using BeautifulSoup
+                    html = record.content_stream().read()
+                    soup = BeautifulSoup(html, "html5lib")
+                    data = soup.findAll(text=True)
+                    result = filter(visible, data)
 
-                result2 = ';'.encode('utf-8').join(result)
-                result2 = ' '.join(result2.split())
-                # Build up the resulting list.
-                # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
-                html_pages_array.append((record_id, result2.encode('utf-8')))
+                    result2 = ';'.encode('utf-8').join(result)
+                    result2 = ' '.join(result2.split())
+                    # Build up the resulting list.
+                    # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
+                    html_pages_array.append((record_id, result2.encode('utf-8')))
+    except Exception:
+        print ("Something is wrong with this entry.")
+
     return html_pages_array
 
 

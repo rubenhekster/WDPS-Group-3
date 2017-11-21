@@ -69,15 +69,15 @@ def decode(x):
     
     
 
-    
+
 record_attribute = sys.argv[1]
 in_file = sys.argv[2]
 # We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
 
 
 
-# Create Spark Context
-sc = SparkContext()
+# Create Spark Context -- Remove this when running locally
+sc = SparkContext("yarn", "wdps1703")
 
 rdd_whole_warc_file = sc.wholeTextFiles(in_file)
 

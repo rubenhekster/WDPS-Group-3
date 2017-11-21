@@ -37,13 +37,14 @@ def visible(element):
     return True
 
 
-record_attribute = sys.argv[1]
-in_file = sys.argv[2]
-# We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
-html_pages_array = []
-
-# Opens the gzipped warc file.
-with gzip.open(in_file, 'rb') as stream:
+def decode(x):
+    html_pages_array = []
+    x = x[1:]
+    wholeTextFile = ' '.join([c.encode('utf-8') for c in x])
+    print(type(wholeTextFile))
+    print
+    from cStringIO import StringIO
+    stream = StringIO(wholeTextFile)
     for record in ArchiveIterator(stream):
         # if the record type is a response (which is the case for html page)
         if record.rec_type == 'response':
@@ -62,18 +63,27 @@ with gzip.open(in_file, 'rb') as stream:
                 result2 = ';'.encode('utf-8').join(result)
                 result2 = ' '.join(result2.split())
                 # Build up the resulting list.
-                #result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
+                # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
                 html_pages_array.append((record_id, result2.encode('utf-8')))
+    return html_pages_array
+    
+    
+
+    
+record_attribute = sys.argv[1]
+in_file = sys.argv[2]
+# We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
+
 
 
 # Create Spark Context
-sc = SparkContext("yarn", "wdps17XX")
+sc = SparkContext()
 
+rdd_whole_warc_file = sc.wholeTextFiles(in_file)
 
-# Parallelize the previously created list so it will work in Spark
-documentRDD = sc.parallelize(html_pages_array)
-# Chunk the text
-chunked_rdd = documentRDD.map(lambda (x, y): ner((x, y)))
+rdd_processed = rdd_whole_warc_file.flatMap(lambda x: decode(x))
+
+chunked_rdd = rdd_processed.map(lambda (x, y): ner((x, y)))
 # Extract named entities
 named_entity_rdd = chunked_rdd.map(lambda (x, y): traverseTree((x, y)))
 print(named_entity_rdd.collect())

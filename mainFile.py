@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 from pyspark.context import SparkContext
 import sys
 
@@ -18,7 +18,6 @@ def traverseTree((x, fullDoc)):
 # encoding: utf-8
 def ner((x, text)):
     import nltk
-    text.decode('utf-8')
     sentences = nltk.sent_tokenize(text)
     sentences = [nltk.word_tokenize(sent) for sent in sentences]
     sentences = [nltk.pos_tag(sent) for sent in sentences]
@@ -31,7 +30,7 @@ def visible(element):
     import re
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
         return False
-    elif re.match('<!--.*-->', str(element.encode('utf-8'))):
+    elif re.match('<!--.*-->', str(element)):
         return False
     return True
 
@@ -39,13 +38,18 @@ def visible(element):
 def decode(x, record_attribute):
     html_pages_array = []
     _, payload = x
-    wholeTextFile = ''.join([c.encode('utf-8') for c in payload])
+    wholeTextFile = ''.join([c for c in payload])
     wholeTextFile = "WARC/1.0" + wholeTextFile
-    wholeTextFile.decode('utf-8')
+    try:
+        wholeTextFile = wholeTextFile.decode('utf-8')
+    except Exception:
+        print("Something went wrong with the encoding")
+        return html_pages_array
     from cStringIO import StringIO
     from warcio.archiveiterator import ArchiveIterator
     from html2text import HTML2Text
     from bs4 import BeautifulSoup
+    print(type(wholeTextFile))
     stream = StringIO(wholeTextFile)
     for record in ArchiveIterator(stream):
         # if the record type is a response (which is the case for html page)
@@ -63,11 +67,11 @@ def decode(x, record_attribute):
                     data = soup.findAll(text=True)
                     result = filter(visible, data)
 
-                    result2 = ';'.encode('utf-8').join(result)
+                    result2 = ';'.join(result)
                     result2 = ' '.join(result2.split())
                     # Build up the resulting list.
                     # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
-                    html_pages_array.append((record_id, result2.encode('utf-8')))
+                    html_pages_array.append((record_id, result2))
         except Exception:
             print ("Something is wrong with this entry.")
     return html_pages_array

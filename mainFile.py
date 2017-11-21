@@ -41,7 +41,7 @@ def decode(x, record_attribute):
     html_pages_array = []
     _, payload = x
     wholeTextFile = ''.join([c.encode('utf-8') for c in payload])
-    wholeTextFile = "WARC/1.0"+wholeTextFile
+    wholeTextFile = "WARC/1.0\n"+wholeTextFile
     from cStringIO import StringIO
     stream = StringIO(wholeTextFile)
     try:
@@ -54,7 +54,6 @@ def decode(x, record_attribute):
                 if record.http_headers != None:
                     # Get the WARC-RECORD-ID
                     record_id = record.rec_headers.get_header(record_attribute)
-                    print (record_id)
                     # Get the HTML
                     h = HTML2Text()
                     # Clean up the HTML using BeautifulSoup
@@ -89,7 +88,6 @@ rdd_whole_warc_file = rdd = sc.newAPIHadoopFile(in_file,
 
 rdd_html_cleaned = rdd_whole_warc_file.flatMap(lambda x: decode(x, record_attribute))
 
-print(rdd_html_cleaned.collect())
 chunked_rdd = rdd_html_cleaned.map(lambda (x, y): ner((x, y)))
 # Extract named entities
 named_entity_rdd = chunked_rdd.map(lambda (x, y): traverseTree((x, y)))

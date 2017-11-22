@@ -3,27 +3,19 @@ from pyspark.context import SparkContext
 import sys
 
 
-# Function to traverse the chunked tree in NLTK
-# encoding: utf-8
-def traverseTree((x, fullDoc)):
-    outList = {}
-    for tree in fullDoc:
-        for chunk in tree:
-            if hasattr(chunk, 'label'):
-                outList[' '.join(c[0] for c in chunk)] = chunk.label()
-    return (x, outList)
-
-
-# Function to tokenize a text
-# encoding: utf-8
-def ner((x, text)):
-    import nltk
-    sentences = nltk.sent_tokenize(text)
-    sentences = [nltk.word_tokenize(sent) for sent in sentences]
-    sentences = [nltk.pos_tag(sent) for sent in sentences]
-    chunks = [nltk.ne_chunk(sent) for sent in sentences]
-    return (x, chunks)
-
+def ner_stanford((x, text), coreNLPdir):
+    from nltk.tag import StanfordNERTagger
+    from nltk.tokenize import word_tokenize
+    st = StanfordNERTagger(coreNLPdir + '/classifiers/english.all.3class.distsim.crf.ser.gz',
+                           coreNLPdir + '/stanford-ner.jar',
+                           encoding='utf-8')
+    tokenized_text = word_tokenize(text)
+    classified_text = st.tag(tokenized_text)
+    output = []
+    for tup in classified_text:
+        if tup[1] != 'O':
+            output.append(tup)
+    print ((x,output))
 
 # defines which tags are excluded from the HTML file
 def visible(element):
@@ -59,7 +51,7 @@ def decode(x, record_attribute):
                     soup = BeautifulSoup(html, "html5lib")
                     data = soup.findAll(text=True)
                     result = filter(visible, data)
-                    result2 = ';'.join(result)
+                    result2 = ' '.join(result)
                     result2 = ' '.join(result2.split()).encode('utf-8')
                     # Build up the resulting list.
                     # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
@@ -72,6 +64,7 @@ def decode(x, record_attribute):
 
 record_attribute = sys.argv[1]  # "WARC-Record-ID"
 in_file = sys.argv[2]  # "/home/kevin/Documents/WDPS/wdps2017/CommonCrawl-sample.warc.gz"
+stanford = sys.argv[3] # https://nlp.stanford.edu/software/stanford-ner-2017-06-09.zip
 # We read one WARC file. This list will contain tuples consisting of the WARC-Record-ID and the cleaned up HTML
 
 # Create Spark Context -- Remove this when running on cluster
@@ -85,7 +78,7 @@ rdd_whole_warc_file = rdd = sc.newAPIHadoopFile(in_file,
 
 rdd_html_cleaned = rdd_whole_warc_file.flatMap(lambda x: decode(x, record_attribute))
 
-chunked_rdd = rdd_html_cleaned.map(lambda (x, y): ner((x, y)))
+chunked_rdd = rdd_html_cleaned.map(lambda (x, y): ner_stanford((x, y), stanford))
 # Extract named entities
-named_entity_rdd = chunked_rdd.map(lambda (x, y): traverseTree((x, y)))
-print(named_entity_rdd.collect())
+
+print(chunked_rdd.collect())

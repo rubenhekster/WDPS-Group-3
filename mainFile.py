@@ -2,7 +2,7 @@ import traceback
 from pyspark.context import SparkContext
 import sys
 from nltk.tag import StanfordNERTagger
-
+import shutil
 
 def ner_stanford((x, text), st):
 
@@ -14,7 +14,7 @@ def ner_stanford((x, text), st):
     for tup in classified_text:
         if tup[1] != 'O':
             output.append(tup)
-    print ((x,output))
+    return ((x,output))
 
 # defines which tags are excluded from the HTML file
 def visible(element):
@@ -57,9 +57,16 @@ def decode(x, record_attribute):
                         # result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
                         html_pages_array.append((record_id, result2))
     except Exception:
-        traceback.print_exc()
+        print("Something went wrong with the archive entry")
 
     return html_pages_array
+
+def create_output((x, text)):
+    output = []
+    text = list(set(text))
+    for (entity, tag) in text:
+        output.append(str(x)+","+entity+","+tag)
+    return output
 
 
 record_attribute = sys.argv[1]  # "WARC-Record-ID"
@@ -81,7 +88,8 @@ rdd_whole_warc_file = rdd = sc.newAPIHadoopFile(in_file,
 
 rdd_html_cleaned = rdd_whole_warc_file.flatMap(lambda x: decode(x, record_attribute))
 
-chunked_rdd = rdd_html_cleaned.map(lambda (x, y): ner_stanford((x, y), st))
+stanford_rdd = rdd_html_cleaned.map(lambda (x, y): ner_stanford((x, y), st))
 # Extract named entities
+text_rdd = stanford_rdd.flatMap(lambda (x,y):create_output((x,y)))
 
-print(chunked_rdd.collect())
+print(text_rdd.collect())

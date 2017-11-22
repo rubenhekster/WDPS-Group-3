@@ -4,11 +4,9 @@ import sys
 from nltk.tag import StanfordNERTagger
 import shutil
 from nltk.tokenize import word_tokenize
+import re
 
 def ner_stanford((x, text), st):
-
- 
-
     tokenized_text = word_tokenize(text.decode('UTF-8'))
     classified_text = st.tag(tokenized_text)
     output = []
@@ -19,7 +17,6 @@ def ner_stanford((x, text), st):
 
 # defines which tags are excluded from the HTML file
 def visible(element):
-    import re
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
         return False
     elif re.match('<!--.*-->', element.encode('UTF-8')):

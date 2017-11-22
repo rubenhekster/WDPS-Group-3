@@ -8,7 +8,7 @@ def ner_stanford((x, text), st):
 
     from nltk.tokenize import word_tokenize
 
-    tokenized_text = word_tokenize(text)
+    tokenized_text = word_tokenize(text.decode('UTF-8'))
     classified_text = st.tag(tokenized_text)
     output = []
     for tup in classified_text:

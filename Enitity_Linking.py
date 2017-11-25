@@ -6,10 +6,7 @@ Created on Sat Nov 25 13:38:33 2017
 """
 
 from elasticsearch import Elasticsearch
-#from pyspark.context import SparkContext
-import org.apache.spark.SparkContext
-import sys
-
+from pyspark.context import SparkContext
 
 print("Start")
 es = Elasticsearch("http://10.149.0.127:9200")

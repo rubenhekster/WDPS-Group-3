@@ -15,7 +15,7 @@ print("Start")
 
 es = Elasticsearch("http://10.149.0.127:9200")
 
-rdd = SparkContext().parallelize["Obama", "Trump", "Clinton", "Bush", "Reagan"]
+rdd = sc.parallelize["Obama", "Trump", "Clinton", "Bush", "Reagan"]
 
 #res = es.search(index="freebase", body={"query": {"match":{"label":x}}})
 

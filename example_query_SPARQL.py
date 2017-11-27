@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/wdps1703/lib/python2.7/site-packages')
+
 import requests
 import json, re
 import collections, math
@@ -27,10 +27,10 @@ if response:
         labels.setdefault(freebase_id, set()).add( label )
 
 print('Found %s results.' % len(labels))
-print('-------------------------------------------------')
+print('\n-------------------------------------------------')
 
 print(ids)
-print('-------------------------------------------------')
+print('\n-------------------------------------------------')
 
 prefixes = """
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

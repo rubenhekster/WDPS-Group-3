@@ -12,9 +12,6 @@ query = sys.argv[1]
 print('Searching for "%s"...' % query)
 response = requests.get(ELASTICSEARCH_URL, params={'q': query, 'size':100})
 ids = set()
-print('printing ids-----------------------')
-print(ids)
-print('---------------------------')
 labels = {}
 scores = {}
 

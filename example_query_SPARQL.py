@@ -27,10 +27,6 @@ if response:
         labels.setdefault(freebase_id, set()).add( label )
 
 print('Found %s results.' % len(labels))
-print('\n-------------------------------------------------')
-
-print(ids)
-print('\n-------------------------------------------------')
 
 prefixes = """
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

@@ -9,18 +9,15 @@ from elasticsearch import Elasticsearch
 from pyspark.context import SparkContext
 #from pyspark import SparkContext, SparkConf
 
-sc = SparkContext()
+sc =SparkContext.getOrCreate()
 
-print("Start")
+print("-----------------Start----------------")
 
 es = Elasticsearch("http://10.149.0.127:9200")
-
-rdd = sc.parallelize["Obama", "Trump", "Clinton", "Bush", "Reagan"]
+rdd = sc.parallelize(["Obama", "Trump", "Clinton", "Bush", "Reagan"])
 
 #res = es.search(index="freebase", body={"query": {"match":{"label":x}}})
 
 output = rdd.flatMap(lambda x: es.search(index="freebase", body={"query": {"match":{"label":x}}}))
-
 print(output)
-
-print("Done")
+print("-----------------------------Complete Elasticsearch-------------------")

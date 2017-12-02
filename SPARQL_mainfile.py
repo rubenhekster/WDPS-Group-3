@@ -96,13 +96,10 @@ text_rdd = stanford_rdd.flatMap(lambda (x,y):create_output((x,y)))
 
 print(text_rdd.collect())
 
-
-
-
 ELASTICSEARCH_URL = 'http://10.149.0.127:9200/freebase/label/_search'
 TRIDENT_URL = 'http://10.141.0.11:8082/sparql'
 
-query = # tokens obtained 
+query = 'obama' # token obtained 
 
 print('Searching for "%s"...' % query)
 #looking for queries that we get from the token with elasticsearch
@@ -138,7 +135,6 @@ PREFIX wds: <http://www.wikidata.org/entity/statement/>
 PREFIX wdv: <http://www.wikidata.org/value/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 """
-### look at NER  
 ### look at NER  tag. if person filter with personEntity, if location filter with locationEntity if organisation
 #filter with organisation entity
 
@@ -198,6 +194,7 @@ SELECT DISTINCT * WHERE {
 print('Counting KB facts...')
 #Link all results from elasticsearch to trident database.  %s in po_templare (are the unique freebase hits)  
 facts  = {}
+n_total = 0
 for i in ids:
     response = requests.post(TRIDENT_URL, data={'print': False, 'query': po_template % i})
     if response:
@@ -206,6 +203,7 @@ for i in ids:
         print(i, ':', n)
         sys.stdout.flush()
         facts[i] = n
+	n_total = n_total+n
  
 def get_best(i):
     return math.log(facts[i]) * scores[i]
@@ -214,6 +212,10 @@ def get_best(i):
 print('Best matches:')
 for i in sorted(ids, key=get_best, reverse=True)[:3]:
     print(i, ':', labels[i], '(facts: %s, score: %.2f)' % (facts[i], scores[i]) )
+    
+    # the normalized score, which we will use when ranking the obtained entities
+    norm_score = facts[i]/n_total
+    
     sys.stdout.flush()
 	#look which entity it is to choose the suited SPARQL query , tag = NER tag 
 	if tag == PERSON:
@@ -242,3 +244,4 @@ for i in sorted(ids, key=get_best, reverse=True)[:3]:
 		response = response.json()
 		for binding in response.get('results', {}).get('bindings', []):
 		    print(' =', binding.get('same', {}).get('value', None))
+

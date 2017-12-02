@@ -16,28 +16,27 @@ def Hamming(str1, str2):
     elif str1 < str2:
         dif = len(str2) - len(str1)
         for i in range(dif):
-            str1_ = str1_ + "0"
-        
-    #print(str1_, str2_)
-
+            str1_ = str1_ + "0"      
+    
     ne = operator.ne
     return sum(map(ne, str1_, str2_))
 
-def GetDistance(str1, str2):
+def GetMatch(str1, str2):
     Dist = []
     
     for i in range(len(str2)):
         Dist.append(Hamming(str1, str2[i][0]))
       
-    Dict = dict((x, y) for x, y in str2) #+ np.transpose(Dist) #+     
+    Dict = dict((x, y) for x, y in str2)     
 
-    i = 0
-    for key, val in Dict.items():
-        NewDict = {key : [val, Dist[i]]}
+    i = 0 
+    for key, val in Dict.items():        
+        Dict[key] = [val, Dist[i]]
         i = i + 1
+        
 
-##    Best_Match = sorted(NewDict.items(), key=operator.itemgetter(2))
-    return(NewDict)
+    Best_Match = sorted(Dict.items(), key=lambda Dict: Dict[1][1])
+    return(Best_Match)
 
         
 def Sum(File):
@@ -48,19 +47,15 @@ def Sum(File):
     return Sum
 
 def main():
-    
 
-#pop + hamming
     File = open('Obama.txt','r').read().split()
     Query = "Obama"
     stop_words = set(stopwords.words("english"))
 
     for i in range(len(File)):
         try:
-            if File[i] in stop_words:
-                
-                File.remove(File[i])
-                
+            if File[i] in stop_words:                
+                File.remove(File[i])                
         except:
             pass
         
@@ -69,12 +64,11 @@ def main():
 
     for key, value in File_.items():
         File_[key] = int(value)/Total
-        #print(File_[key])
-        #File_[j] = log(File_[j]) / Total
+
     
     Top100 =  File_.most_common(100)
-    print(Top100)        
-    print(GetDistance(Query, Top100))
+            
+    print(GetMatch(Query, Top100))
 
 if __name__ == '__main__':
     main()

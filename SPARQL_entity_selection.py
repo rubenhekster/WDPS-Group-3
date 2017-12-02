@@ -27,7 +27,17 @@ person: wd:Q5
 """
 
 """
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wds: <http://www.wikidata.org/entity/statement/>
+PREFIX wdv: <http://www.wikidata.org/value/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+"""
+
+
+"""
 SELECT ?item ?itemLabel 
 WHERE {
   ?item wdt:P31 wd:Q146.
 }
+
+

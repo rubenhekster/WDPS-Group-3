@@ -19,12 +19,16 @@ def Hamming(str1, str2):
     ne = operator.ne
     return sum(map(ne, str1_, str2_))
 
+def GetDistance(str1, str2):
+
+    for i in range(len(str2)):
+        print("Hamming Distance: ", Hamming(str1, str2[i]))
+
 def main():
     str1 = "Obama"
     str2 = ["Osama", "A lama", "Pyjama", "Futurama", "Alabama"]
     
-    for i in range(len(str2)):
-        print("Hamming Distance: ", Hamming(str1, str2[i]))
+    GetDistance(str1, str2)
 
 if __name__ == '__main__':
     main()

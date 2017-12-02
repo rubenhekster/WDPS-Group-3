@@ -97,7 +97,7 @@ text_rdd = stanford_rdd.flatMap(lambda (x,y):create_output((x,y)))
 print(text_rdd.collect())
 
 ELASTICSEARCH_URL = 'http://10.149.0.127:9200/freebase/label/_search'
-TRIDENT_URL = 'http://10.141.0.11:8082/sparql'
+TRIDENT_URL = 'http://10.141.0.11:9200/sparql'
 
 query = 'obama' # token obtained 
 

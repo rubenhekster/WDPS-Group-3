@@ -14,7 +14,7 @@ PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 
 #select person entity 
 """
-SELECT  ?person 
+SELECT DISTINCT ?person 
 WHERE
 {
 	?person wdt:P31 wd:Q5 .       #where ?person isa(wdt:P31) human(wd:Q5)
@@ -23,7 +23,7 @@ WHERE
 
 #select organisation enitity 
 """
-SELECT ?organisation ?organisation2 
+SELECT DISTINCT ?organisation ?organisation2 
 WHERE 
 {
   ?organisation wdt:P31 wd:Q43229. #organisation (collective goal)
@@ -33,7 +33,7 @@ WHERE
 
 #select location enitity 
 """
-SELECT ?location ?locationLabel 
+SELECT DISTINCT ?location ?locationLabel 
 WHERE 
 {
   ?location wdt:P31 wd:Q17334923. #where ?location isa location

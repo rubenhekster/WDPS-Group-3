@@ -99,6 +99,7 @@ SELECT DISTINCT * WHERE {
 print('Counting KB facts...')
 #Link all results from elasticsearch to trident database.  %s in po_templare (are the unique freebase hits)  
 facts  = {}
+n_total = 0
 for i in ids:
     response = requests.post(TRIDENT_URL, data={'print': False, 'query': po_template % i})
     if response:
@@ -107,6 +108,7 @@ for i in ids:
         print(i, ':', n)
         sys.stdout.flush()
         facts[i] = n
+	n_total = n_total+n
  
 def get_best(i):
     return math.log(facts[i]) * scores[i]
@@ -115,6 +117,10 @@ def get_best(i):
 print('Best matches:')
 for i in sorted(ids, key=get_best, reverse=True)[:3]:
     print(i, ':', labels[i], '(facts: %s, score: %.2f)' % (facts[i], scores[i]) )
+    
+    # the normalized score, which we will use when ranking the obtained entities
+    norm_score = facts[i]/n_total
+    
     sys.stdout.flush()
 	#look which entity it is to choose the suited SPARQL query , tag = NER tag 
 	if tag == PERSON:

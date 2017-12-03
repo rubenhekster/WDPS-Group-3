@@ -35,6 +35,10 @@ To link the entities to the Freebase, we used the following approach:
   4) We combined these the similarity score and the popularity score and ranked the potential candidates accordingly to get
      the most promising freebase id
   5) We generated the necessary output file.
+ ## 5)Next step/ something we tried
+ Next to the steps described in #4 we also tried to use the outcome of the named entity to filter the entities we obtain from freebase.
+ The idea was that if we would have list of entities found in freebase that we could filter out all the redundant entities. This would 
+ make the selection of entities to choose from smaller and more accurate. However when trying to implement this, the SPARQL queries did  not gave the desirable output. 
 
 ## NOTES ON HOW TO RUN THE SOLUTION
 The repository "https://github.com/khehn/WDPS-Java.git" contains the Java source code. After pulling this source code one has to do the following steps:

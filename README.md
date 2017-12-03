@@ -25,4 +25,12 @@ As we parsed the WARC records using a dedicated library, we were able to remove 
 The next step was to extract named entities from the text. For that task, we decided to use the Stanford CoreNLP library. Locally it worked fine, but as we tested it the first time in a real cluster setting on more than just the sample data, we experienced OutOfMemory errors, causing the program to crash. After some longer research on this topic we found out, that that could have been related to long sentences on the web pages. It could be, that through some mistakes the HTML parser makes on unclean text, really long sentences are created. These sentences cause the CoreNLP tools to acquire more and more memory until the program runs out of memory and crashes. To avoid this issue, we decided to have a maximum length of text to annotate at once of 10000 chars. If the text is long, we split it and process in two chunks. 
 After we did that, the OutOfMemory erros were gone.
 ## 4) Link entities to Freebase
+To link the entities to the Freebase, we used the following approach:
+  1) We searched on the Elasticsearch instance potentially interesting candidates. (Candidate Generation)
+  2) For these candidates we calculated their popularity score based on their occurence
+  3) We furthermore calculated a similarity score using the dice coefficient and the hamming distance.
+  4) We combined these the similarity score and the popularity score and ranked the potential candidates accordingly to get
+     the most promising freebase id
+  5) We generated the necessary output file.
 
+## NOTES ON HOW TO RUN THE SOLUTION

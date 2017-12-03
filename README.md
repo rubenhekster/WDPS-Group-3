@@ -34,3 +34,18 @@ To link the entities to the Freebase, we used the following approach:
   5) We generated the necessary output file.
 
 ## NOTES ON HOW TO RUN THE SOLUTION
+The repository "https://github.com/khehn/WDPS-Java.git" contains the Java source code. After pulling this source code one has to do the following steps:
+1) mvn package (Creates a jar file). 
+
+!!!!Alternatively just use the file /home/wdps1703/testJava/WDPS-Java/target/NLP-jar-with-dependencies.jar!!!
+This file is also used by default if one just executes the run.sh file
+
+2) locate the run.sh file and run it either with default configurations are adapt accordingly.
+  2.1) ATT: First parameter changes the used WARC-Record-ID.
+  2.2) INFILE: Adapt accordingly
+  2.3) OUTPUTFILE: Specify, where the output file should be written. The program will create output.tsv there
+3) If needed: Specify additionaly parameters:
+  3.1) JARFILE: If you want to build your own jar, add the location here
+  3.2) LOCALMODE: If the solution is run locally, this must be true
+  3.3) DEL: Specifies the delimiter the code is using to split the warc files.
+Notes: The spark submit uses 20 executors, each with 5G memory. If one needs to change that, one can do so in the run.sh file

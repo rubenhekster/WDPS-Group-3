@@ -51,4 +51,5 @@ This file is also used by default if one just executes the run.sh file
   3.1) JARFILE: If you want to build your own jar, add the location here
   3.2) LOCALMODE: If the solution is run locally, this must be true
   3.3) DEL: Specifies the delimiter the code is using to split the warc files.
+  3.4) TRIDENT: Here you can specify a trident server URL. Since we used an own instance
 Notes: The spark submit uses 20 executors, each with 5G memory. If one needs to change that, one can do so in the run.sh file

@@ -38,12 +38,12 @@ To link the entities to the Freebase, we used the following approach:
 
 ## NOTES ON HOW TO RUN THE SOLUTION
 The repository "https://github.com/khehn/WDPS-Java.git" contains the Java source code. After pulling this source code one has to do the following steps:
-1) mvn package (Creates a jar file). 
+1 mvn package (Creates a jar file). 
 
 !!!!Alternatively just use the file /home/wdps1703/testJava/WDPS-Java/target/NLP-jar-with-dependencies.jar!!!
 This file is also used by default if one just executes the run.sh file
 
-2) locate the run.sh file and run it either with default configurations are adapt accordingly.
+2 locate the run.sh file and run it either with default configurations are adapt accordingly.
 
   2.1) ATT: First parameter changes the used WARC-Record-ID
   
@@ -51,7 +51,7 @@ This file is also used by default if one just executes the run.sh file
   
   2.3) OUTPUTFILE: Specify, where the output file should be written. The program will create output.tsv there
   
-3) If needed: Specify additionaly parameters:
+3 If needed: Specify additionaly parameters:
 
   3.1) JARFILE: If you want to build your own jar, add the location here
   

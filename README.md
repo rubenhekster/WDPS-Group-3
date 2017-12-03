@@ -2,17 +2,20 @@
 Web Data Processing Systems 2017 (VU course XM_40020)
 
 # Assignment 1: Large Scale Entity Linking
-The goal of this assignment was to take an input containing WARC files and process this input. The processing should contain a NER part as well as an entity linking component.
+The goal of this assignment was to take input files containing WARC compressed data and process them. 
+The processing should contain a NER part as well as an entity linking component.
 
 General Note: As you may notice, there are two repositories containing code from our group. 
-There is this one which contains Python code and another one containing Java code.
+There is this one, which contains Python code and another one containing Java code.
 The repository containing Java code is available under: "https://github.com/khehn/WDPS-Java.git"
 And Benno should be added as a contributor there. 
 
-IMPORTANT: The Java repository contains the final solution to our project.
+IMPORTANT: The Java repository contains the final solution for our group!
 
 But why did we use a second repository?
-The reason for that was, that there have been problems deploying third party python library to the cluster. Due to this issue, it was not possible to test the solution in a real cluster setting. Therefore we couldn't be sure if our solution will maybe crash on a real cluster or not. 
+The reason for that was, that there have been problems deploying third party python libraries to the cluster. 
+Due to this issue, it was not possible to test the solution in a real cluster setting. 
+Therefore we couldn't be sure, that our solution will not crash on a real cluster. 
 To overcome this issue, we recoded our solution in Java.
 
 We devided the assigments in three different steps:

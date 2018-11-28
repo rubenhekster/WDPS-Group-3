@@ -22,7 +22,7 @@ def ner_stanford(x, text, st):
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
         return False
-    elif re.match('<!--.*-->', element.encode('UTF-8')):
+    elif re.match('<!--.*-->', element): #.encode('UTF-8')):
         return False
     return True
 
@@ -40,7 +40,7 @@ def decode(x, record_attribute):
 
     from io import BytesIO
     from warcio.archiveiterator import ArchiveIterator
-    
+
     from html2text import HTML2Text
     from bs4 import BeautifulSoup
     import html5lib
@@ -113,7 +113,7 @@ rdd_html_cleaned = rdd_whole_warc_file.flatMap(lambda x: decode(x, record_attrib
 
 stanford_rdd = rdd_html_cleaned.map(lambda x, y: ner_stanford(x, y, st))
 # Extract named entities
-text_rdd = stanford_rdd.flatMap(lambda x ,y :create_output(x,y))
+text_rdd = stanford_rdd.flatMap(lambda x ,y : create_output(x,y))
 
 print(text_rdd.collect())
 

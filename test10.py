@@ -4,20 +4,40 @@ from pyspark.context import SparkContext
 from nltk.tag import StanfordNERTagger
 #import shutil
 from nltk.tokenize import word_tokenize
+import nltk
 import re
+import os
 #import pdb
 #import warc
 
+# nltk.download() # Use only if not yet installed
 
-def ner_stanford(x, text, st):
+def get_array(input):
+
+    identifier = []
+    html_text = []
+
+    for i in range(len(input)):
+        identifier.append(input[i][0])
+        html_text.append(input[i][1])
+
+    return identifier, html_text
+
+
+def ner_stanford(input, st):
+
+    x, text = get_array(input)
 
     print('test')
-    tokenized_text = word_tokenize(text.decode('utf-8'))
-    classified_text = st.tag(tokenized_text)
     output = []
-    for tup in classified_text:
-        if tup[1] != 'O':
-            output.append(tup)
+    for i in range(len(text)):
+        tokenized_text = word_tokenize(text[i])
+        classified_text = st.tag(tokenized_text)
+
+        for tup in classified_text:
+            if tup[1] != 'O':
+                output.append(tup)
+
     return x, output
 
 
@@ -25,13 +45,17 @@ def ner_stanford(x, text, st):
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
         return False
-    elif re.match('<!--.*-->', element.encode('utf-8')):
+    elif re.match('<!--.*-->', element): #.encode('utf-8')):
         return False
     return True
 
 
 def decode(x, record_attribute):
     html_pages_array = []
+
+    # identifier = []
+    # html_text = []
+
     _, payload = x
     # payload = (payload.encode('utf-8'))
 
@@ -50,53 +74,58 @@ def decode(x, record_attribute):
     stream = BytesIO(wholeTextFile)
 
     list_error = []
-    # try:
-    for record in ArchiveIterator(stream):
+    try:
+        for record in ArchiveIterator(stream):
 
-        # if the record type is a response (which is the case for html page)
-        list_error.append('1')
-        if record.rec_type == 'response':
-            list_error.append('2')
-            # check if the response is http
-            if record.http_headers != None:
-                list_error.append('3')
-                # Get the WARC-RECORD-ID
-                record_id = record.rec_headers.get_header(record_attribute)
-                list_error.append('4')
-                # Clean up the HTML using BeautifulSoup
-                html = record.content_stream().read()
-                soup = BeautifulSoup(html, "html5lib")
-                data = soup.findAll(text=True)#.encode()
-                list_error.append('5')
-                result = filter(visible, data)
-                list_error.append('5.1')
-                result2 = ' '.join(result)
-                list_error.append('5.2')
-                result2 = ' '.join(result2.split())
-                list_error.append('6')
-                # Build up the resulting list.
-                #result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
-                #result2 = result2.encode('utf-16')
-                #result2 = result2.encode("utf-8")
-                list_error.append('7')
-                if result2 != '' and isinstance(result2, str):
-                    html_pages_array.append([record_id, result2])
-                    list_error.append('8')
-    #
-    # except Exception:
-    #     print("Something went wrong with the archive entry")
-    #     print(list_error)
+            # if the record type is a response (which is the case for html page)
+            list_error.append('1')
+            if record.rec_type == 'response':
+                list_error.append('2')
+                # check if the response is http
+                if record.http_headers != None:
+                    list_error.append('3')
+                    # Get the WARC-RECORD-ID
+                    record_id = record.rec_headers.get_header(record_attribute)
+                    list_error.append('4')
+                    # Clean up the HTML using BeautifulSoup
+                    html = record.content_stream().read()
+                    soup = BeautifulSoup(html, "html5lib")
+                    data = soup.findAll(text=True)#.encode()
+                    list_error.append('5')
+                    result = filter(visible, data)
+                    list_error.append('5.1')
+                    result2 = ' '.join(result)
+                    list_error.append('5.2')
+                    result2 = ' '.join(result2.split())
+                    list_error.append('6')
+                    # Build up the resulting list.
+                    #result2 = re.sub(r'[\?\.\!]+(?=[\?\.\!])', '.', result2)
+                    #result2 = result2.encode('utf-16')
+                    #result2 = result2.encode("utf-8")
+                    list_error.append('7')
+                    result2 = result2.encode('ascii', errors="ignore").decode('ascii')
+                    list_error.append('7.1')
+                    if result2 != '' and isinstance(result2, str):
+                        html_pages_array.append([record_id, result2])
+                        # identifier.append(record_id)
+                        # html_text.append(result2)
+                        list_error.append('8')
 
-    for i in range(len(html_pages_array)):
-    #     print(type(html_pages_array[i]))
+    except Exception:
+        print("Something went wrong with the archive entry")
+        print(list_error)
 
-        print('num 1', type(html_pages_array[i][0]))
-        print('num 2', type(html_pages_array[i][1]))
+
+    # for i in range(len(html_pages_array)):
+    # #     print(type(html_pages_array[i]))
+    #     iden
+    #     print('num 1', type(html_pages_array[i][0]))
+    #     print('num 2', type(html_pages_array[i][1]))
 
         #html_pages_array[i] = html_pages_array[i].encode
     # print(len(html_pages_array))
     # html_pages_array[25]
-    return html_pages_array
+    return html_pages_array #identifier, html_text
 
 
 def create_output(x, text):
@@ -106,6 +135,10 @@ def create_output(x, text):
         output.append(str(x) + "," + entity + "," + tag)
     return output
 
+
+
+java_path = "C:/Program Files/Java/jdk1.8.0_191/bin/java.exe"
+os.environ['JAVAHOME'] = java_path
 
 record_attribute = "WARC-Record-ID"
 in_file = "C:/Users/klm85310/Documents/WDPS/sample.warc.gz"
@@ -129,11 +162,14 @@ print("step 2")
 
 
 
-#stanford_rdd = rdd_html_cleaned.map(lambda x, y: ner_stanford(x, y, st))
+stanford_rdd = rdd_html_cleaned.map(lambda x: ner_stanford(x, st))
 # Extract named entities
 # text_rdd = stanford_rdd.flatMap(lambda x ,y : create_output(x,y))
 #rdd_html_cleaned.saveAsTextFile("sample_text.txt")
-print(rdd_html_cleaned.collect())
+#full_text = rdd_html_cleaned.collect()
+
+print(stanford_rdd.collect())
+print('Done')
 
 # def main():
 #

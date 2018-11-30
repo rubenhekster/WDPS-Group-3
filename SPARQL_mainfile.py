@@ -1,9 +1,9 @@
 import traceback
 from pyspark.context import SparkContext
 import sys
-from nltk.tag import StanfordNERTagger
+# from nltk.tag import StanfordNERTagger
 import shutil
-from nltk.tokenize import word_tokenize
+# from nltk.tokenize import word_tokenize
 import re
 # sys.path.append('/home/wdps1703/lib/python2.7/site-packages')
 import requests
